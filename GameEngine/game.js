@@ -6,7 +6,7 @@ function rect(x, y, w, h) {
 }
 
 //var r	= new rect(100,20,10,10)
-var	rects = [
+var rects = [
 	new rect(0, 0, 400, 20),
 	new rect(0, 0, 20, 300),
 	new rect(0, 280, 400, 20),
@@ -15,23 +15,26 @@ var	rects = [
 	new rect(100, 120, 20, 20),
 	new rect(120, 140, 20, 20),
 	new rect(140, 160, 80, 20),
-	new rect(260, 160, 120, 20)
+	new rect(260, 180, 20, 20),
+	new rect(280, 200, 20, 20),
+	new rect(300, 220, 20, 20)
 ]
 
 function player(rx, ry, rw, rh, vx, vy) {
 	this.r = new rect(rx, ry, rw, rh);
 	this.x = vx;
 	this.y = vy;
+	this.isOnFloor=false;
 }
 
 var p = new player(60, 60, 20, 20, 0, 0);
 
-var keyUp
-var keyLeft
-var keyRight
+var keyUp=false
+var keyLeft = false
+var keyRight = false
 
 document.onkeydown = function (e) {
-	document.test.eingabe3.value = e.which
+	document.test.eingabe1.value = e.which
 	if (e.which == 87)
 		keyUp = true;
 	if (e.which == 65)
@@ -41,7 +44,7 @@ document.onkeydown = function (e) {
 }
 
 document.onkeyup = function (e) {
-	document.test.eingabe3.value = e.which
+	document.test.eingabe1.value = e.which
 	if (e.which == 87)
 		keyUp = false;
 	if (e.which == 65)
@@ -52,18 +55,35 @@ document.onkeyup = function (e) {
 
 function speedX() {
 	p.x = 0
-	if (keyLeft	== true)
-	    p.x = -3
+	if (keyLeft == true)
+		p.x = -3
 	if (keyRight ==	true)
-	    p.x = 3
+		p.x = 3
 }
 
 function speedY() {
-//    p.y = 0
+	p.y = false
 	if (keyUp == true)
-	    p.y = -5
-    
+		p.y = true
+	
 }
+
+// Return an object that supports at most "copies" simultaneous playbacks
+function createSound(path, copies) {
+	var elems = [], index = 0
+	for (var i = 0; i < 16; i++) elems.push(new Audio(path))
+	return {
+		play: function () {
+			if (window.chrome) elems[index].load()
+			elems[index].play()
+			index = (index + 1) % copies
+		}
+	}
+}
+
+// Want to be able to play at most 3 different copies of 'jump.wav' at once
+var jumpSound = createSound('hop.mp3', 3)
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // First Function
@@ -113,35 +133,46 @@ function updateGame () {
 function checkKey () {
 	//printout('checkKey');
 	speedX();
-	speedY();
+	//speedY();
 }
 // Returns true iff a and b overlap
 function overlapTest(a, b) {
   return a.x < b.x + b.w && a.x + a.w > b.x &&
-         a.y < b.y + b.h && a.y + a.h > b.y
+		 a.y < b.y + b.h && a.y + a.h > b.y
 }
 
-function movePlayer	() {
+function movePlayer() {
 	//printout('movePlayer');
-    p.y += 1;
-    // Move rectangle along x axis
+	p.y += 1;
+	var expectedY = p.r.y + p.y
+	document.test.eingabe2.value = expectedY
+	// Move rectangle along x axis
 	for (var i = 0; i < rects.length; i++) {
 		var c = { x: p.r.x + p.x, y: p.r.y, w: p.r.w, h: p.r.h }
 		if (overlapTest(c, rects[i])) {
-		    if (p.x < 0) p.x = rects[i].x + rects[i].w - p.r.x
-		    else if (p.x > 0) p.x = rects[i].x - p.r.x - p.r.w
+			if (p.x < 0) p.x = rects[i].x + rects[i].w - p.r.x
+			else if (p.x > 0) p.x = rects[i].x - p.r.x - p.r.w
 		}
 	}
 	p.r.x += p.x;
-    // Move rectangle along y axis
+	// Move rectangle along y axis
 	for (var i = 0; i < rects.length; i++) {
-	    var c = { x: p.r.x, y: p.r.y + p.y, w: p.r.w, h: p.r.h }
-	    if (overlapTest(c, rects[i])) {
-	        if (p.y < 0) p.y = rects[i].y + rects[i].h - p.r.y
-	        else if (p.y > 0) p.y = rects[i].y - p.r.y - p.r.h
-	    }
+		var c = { x: p.r.x, y: p.r.y + p.y, w: p.r.w, h: p.r.h }
+		if (overlapTest(c, rects[i])) {
+			if (p.y < 0) p.y = rects[i].y + rects[i].h - p.r.y
+			else if (p.y > 0) p.y = rects[i].y - p.r.y - p.r.h
+		}
 	}
 	p.r.y += p.y
+	p.isOnFloor = (expectedY > p.r.y)
+	if (expectedY != p.r.y)		p.y = 0
+	if (p.isOnFloor && keyUp) {
+		p.y += -13;
+		jumpSound.play()
+	}
+	document.test.eingabe2.value = expectedY 
+	document.test.eingabe3.value = p.r.y
+	document.test.eingabe4.value = p.isOnFloor
 	//console.log(vx);
 }
 
