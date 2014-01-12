@@ -68,10 +68,11 @@ function drawPlayer () {
 function drawEnemy () {
 	printout('drawEnemy');
 }
+
 function printout(s)
 {
 	document.write(s);
 	document.write('</br>');
 }
 
-onStart ();
+printout ("Out");
