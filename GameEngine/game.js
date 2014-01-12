@@ -1,28 +1,27 @@
 function rect(x, y, w, h) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
+	this.x = x;
+	this.y = y;
+	this.w = w;
+	this.h = h;
 }
 
-//var r = new rect(100,20,10,10)
-var rects = [
-    new rect(0, 0, 400, 20),
-    new rect(0, 0, 20, 300),
-    new rect(0, 280, 400, 20),
-    new rect(380, 0, 20, 300),
-    new rect(20, 100, 80, 20),
-    new rect(100, 120, 20, 20),
-    new rect(120, 140, 20, 20),
-    new rect(140, 160, 80, 20),
-    new rect(260, 160, 120, 20)
+//var r	= new rect(100,20,10,10)
+var	rects = [
+	new rect(0, 0, 400, 20),
+	new rect(0, 0, 20, 300),
+	new rect(0, 280, 400, 20),
+	new rect(380, 0, 20, 300),
+	new rect(20, 100, 80, 20),
+	new rect(100, 120, 20, 20),
+	new rect(120, 140, 20, 20),
+	new rect(140, 160, 80, 20),
+	new rect(260, 160, 120, 20)
 ]
 
 function player(rx, ry, rw, rh, vx, vy) {
-    this.r = new rect(rx, ry, rw, rh);
-    this.x = vx;
-    this.y = vy;
-
+	this.r = new rect(rx, ry, rw, rh);
+	this.x = vx;
+	this.y = vy;
 }
 
 var p = new player(60, 60, 20, 20, 0, 0);
@@ -30,67 +29,61 @@ var p = new player(60, 60, 20, 20, 0, 0);
 var keyUp
 var keyLeft
 var keyRight
-var vx
-var vy
 
 document.onkeydown = function (e) {
-  //  document.test.eingabe.value = e.which
-    if (e.which == 87)
-        keyUp = true;
-    if (e.which == 65)
-        keyLeft = true;
-    if (e.which == 68)
-        keyRight = true;
-
+	document.test.eingabe3.value = e.which
+	if (e.which == 87)
+		keyUp = true;
+	if (e.which == 65)
+		keyLeft = true;
+	if (e.which == 68)
+		keyRight = true;
 }
 
 document.onkeyup = function (e) {
-//    document.test.eingabe.value = e.which
-    if (e.which == 87)
-        keyUp = false;
-    if (e.which == 65)
-        keyLeft = false;
-    if (e.which == 68)
-        keyRight = false;
-
+	document.test.eingabe3.value = e.which
+	if (e.which == 87)
+		keyUp = false;
+	if (e.which == 65)
+		keyLeft = false;
+	if (e.which == 68)
+		keyRight = false;
 }
 
 function speedX() {
-    vx = 0
-
-    if (keyLeft == true)
-        vx = -1
-    if (keyRight == true)
-        vx = 1
+	p.x = 0
+	if (keyLeft	== true)
+	    p.x = -3
+	if (keyRight ==	true)
+	    p.x = 3
 }
 
 function speedY() {
-    vy = 0
-
-    if (keyUp == true)
-        vy = 1
+//    p.y = 0
+	if (keyUp == true)
+	    p.y = -5
+    
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // First Function
 function onStart() {
-    printout('onStart');
-    vx = 0
-    vy = 0
-
-    loadRes();
-    buildLevel();
-    startLoop();
+	printout('onStart');
+	vx = 0
+	vy = 0
+	loadRes();
+	buildLevel();
+	startLoop();
 }
 
 function startLoop () {
-    //printout('startLoop');
-    // Set up the game loop
-    window.onload = function () {
-        setInterval(function () {
-            onUpdate()
-        }, 1000 / 60)
-    }
+	//printout('startLoop');
+	// Set up the game loop
+	window.onload = function () {
+		setInterval(function () {
+			onUpdate()
+		}, 1000 / 60)
+	}
 }
 
 function loadRes () {
@@ -103,10 +96,8 @@ function buildLevel () {
 
 // General Update
 function onUpdate () {
-	printout('onUpdate');
-    document.test.eingabe1.value = p.r.x
-    document.test.eingabe2.value = vx
-    updateGame();
+//	printout('onUpdate');
+	updateGame();
 	updateView ();
 }
 
@@ -121,11 +112,37 @@ function updateGame () {
 //
 function checkKey () {
 	//printout('checkKey');
+	speedX();
+	speedY();
+}
+// Returns true iff a and b overlap
+function overlapTest(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x &&
+         a.y < b.y + b.h && a.y + a.h > b.y
 }
 
-function movePlayer () {
-    //printout('movePlayer');
-    p.r.x += vx;
+function movePlayer	() {
+	//printout('movePlayer');
+    p.y += 1;
+    // Move rectangle along x axis
+	for (var i = 0; i < rects.length; i++) {
+		var c = { x: p.r.x + p.x, y: p.r.y, w: p.r.w, h: p.r.h }
+		if (overlapTest(c, rects[i])) {
+		    if (p.x < 0) p.x = rects[i].x + rects[i].w - p.r.x
+		    else if (p.x > 0) p.x = rects[i].x - p.r.x - p.r.w
+		}
+	}
+	p.r.x += p.x;
+    // Move rectangle along y axis
+	for (var i = 0; i < rects.length; i++) {
+	    var c = { x: p.r.x, y: p.r.y + p.y, w: p.r.w, h: p.r.h }
+	    if (overlapTest(c, rects[i])) {
+	        if (p.y < 0) p.y = rects[i].y + rects[i].h - p.r.y
+	        else if (p.y > 0) p.y = rects[i].y - p.r.y - p.r.h
+	    }
+	}
+	p.r.y += p.y
+	//console.log(vx);
 }
 
 function checkColl () {
@@ -133,25 +150,27 @@ function checkColl () {
 }
 
 // Update View
-function updateView () {
+function updateView() {
 	//printout('updateView');
-	
 	drawLevel ();
 	drawEnemy ()
 }
 //
 function drawLevel () {
-    //printout('drawLevel');
-    var c = document.getElementById('screen').getContext('2d')
-    // Draw levels
-    c.fillStyle = '#BBB'
-    for (var i = 0; i < rects.length; i++) {
-        var r = rects[i]
-        c.fillRect(r.x, r.y, r.w, r.h)
-    }
-    //draw player
-    c.fillStyle = '#C00'
-    c.fillRect(p.r.x, p.r.y, p.r.w, p.r.h)
+	//printout('drawLevel');
+	var c = document.getElementById('screen').getContext('2d')
+	// Draw background
+	c.fillStyle = '#EEE'
+	c.fillRect(0, 0, c.canvas.width, c.canvas.height)
+	// Draw levels
+	c.fillStyle = '#BBB'
+	for (var i = 0; i < rects.length; i++) {
+		var r = rects[i]
+		c.fillRect(r.x, r.y, r.w, r.h)
+	}
+	//draw player
+	c.fillStyle = '#C00'
+	c.fillRect(p.r.x, p.r.y, p.r.w, p.r.h)
 }
 
 function drawEnemy () {
@@ -159,9 +178,11 @@ function drawEnemy () {
 }
 function printout(s)
 {
-    //console.log(s);
-    document.test.eingabe3.value = vx
+	console.log(s);
+	//console.log("console.log");
+	//document.test.eingabe3.value = vx
 
 }
-
-onStart ();
+onStart();
+//updateView();
+//onUpdate();
